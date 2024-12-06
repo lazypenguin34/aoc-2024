@@ -20,10 +20,38 @@ bool passesPartOne(const unordered_map<int, vector<int>> &rules, const vector<in
                 return false;
             }
         }
-
     }
 
     return true;
+}
+
+int partTwoMidPage(const unordered_map<int, vector<int>> &rules, vector<int> &update) {
+    bool swapped = true;
+    while (swapped) {
+        swapped = false;
+        for (int i=0;i<update.size();i++) {
+            int x = update[i];
+            if (rules.find(x) == rules.end()) {
+                continue; // if there's no rules for a character, we can skip it
+            }
+
+            vector<int> specificRules = rules.at(x);
+            for (int y : specificRules) {
+                auto it = find(update.begin(), update.end(), y);
+                if (it == update.end()) {
+                    continue; // if y isn't in the update, then it can't have broken the rule
+                }
+
+                int index = distance(update.begin(), it);
+                if (index < i) { // then we have broke the rule, so swap the positions of x and y
+                    swapped = true;
+                    swap(update[i], update[index]);
+                }
+            }
+        }
+    }
+
+    return update[update.size() / 2];
 }
 
 int main() {
@@ -51,8 +79,22 @@ int main() {
     int total = 0;
     for(vector<int> update : updates) {
         if (passesPartOne(rules, update)) {
-            total += update[update.size() / 2]; // idk if the -1 is neccessary but im doing it anyway
+            total += update[update.size() / 2];
         }
     }
     printf("Part 1: %d\n", total); // gonna start using printf now cause internet man said cout is ass (it is)
+
+
+    // Part 2
+    total = 0;
+    for (vector<int> update : updates) {
+        if (!passesPartOne(rules, update)) {
+            int mid = partTwoMidPage(rules, update);
+            total += partTwoMidPage(rules, update);
+        }
+    }
+
+    printf("Part 2: %d\n", total);
+
+    return 0;
 }
